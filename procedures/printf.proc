@@ -1,68 +1,111 @@
 include ../../plugin_varargs/procedures/varargs.proc
 include ../../plugin_utils/procedures/utils.proc
 include ../../plugin_utils/procedures/base_conversions.proc
+include ../../plugin_utils/procedures/try.proc
 
 include ../../plugin_utils/procedures/trace.proc
 trace.enable = 0
 
+call try
+... null$ = if windows then "NUL" else "/dev/null" fi     \n
+... runSystem: "printf " , """""", " 2 > " + null$
+if try.catch
+  printf.system = 0
+else
+  @trace: "Using system printf"
+  printf.system = 1
+endif
+
 procedure printf ()
-  for .i to .argn
-    sprintf.argv$[.i] = .argv$[.i]
-  endfor
-  sprintf.argn = .argn
+  if printf.system
+    .cmd$ = """printf """
+    for .i to .argn
+      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+    endfor
 
-  @sprintf()
+    runSystem: '.cmd$'
+  else
+    for .i to .argn
+      sprintf.argv$[.i] = .argv$[.i]
+    endfor
+    sprintf.argn = .argn
 
-  appendInfoLine: sprintf.return$
+    @sprintf()
+
+    appendInfoLine: sprintf.return$
+  endif
 endproc
 
 procedure fprintf ()
-  call @:sprintf: .arg$
-  appendFileLine: sprintf.return$
+  if printf.system
+    .cmd$ = """printf """
+    for .i to .argn
+      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+    endfor
+
+    runSystem: '.cmd$'
+  else
+    call @:sprintf: .arg$
+    appendFileLine: sprintf.return$
+  endif
 endproc
 
 procedure sprintf ()
-  if .argn < 1
-    exitScript: "sprintf called with no arguments"
+  if printf.system
+    .cmd$ = """printf """
+    for .i to .argn
+      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+    endfor
+
+    .null$ = if windows then "NUL" else "/dev/null" fi
+
+    @mktempfile: "printfXXXXXXXX", "txt"
+    nocheck runSystem: '.cmd$', " > ", mktempfile.return$
+    .return$ = readFile$(mktempfile.return$)
+    deleteFile(mktempfile.return$)
+  else
+    if .argn < 1
+      exitScript: "sprintf called with no arguments"
+    endif
+
+    #           Escape Index      Flag       Width       Precision       Length           Specifier
+    .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdioxXfFeEgGaAsn]))"
+
+    @trace: "Formatting """ + .argv$[1] + """"
+    .todo$ = .argv$[1]
+    .return$ = ""
+
+    .i = 1
+    .failsafe = 0
+    repeat
+      .failsafe += 1
+
+      .prototype = index_regex(.todo$, .regex$)
+      if .prototype
+        .clear$ = left$(.todo$, .prototype - 1)
+        .todo$  = right$(.todo$, length(.todo$) - .prototype + 1)
+      else
+        .clear$ = .todo$
+        .todo$  = ""
+      endif
+
+      .clear$ = replace$(.clear$, "%%", "%", 0)
+      .clear$ = replace_regex$(.clear$, "(?<!\\)\\t", tab$, 0)
+      .clear$ = replace_regex$(.clear$, "(?<!\\)\\n", newline$, 0)
+      .clear$ = replace_regex$(.clear$, "\\\\", "\", 0)
+      .return$ = .return$ + .clear$
+
+      if .todo$ != ""
+        @_printf_parse: .todo$
+        @_printf_replace: .flag$, .width, .precision, .length$, .specifier$, .argv$[.index]
+        .return$ = .return$ + "'_printf_replace.return$'"
+        .todo$ = right$(.todo$, length(.todo$) - length(sprintf.full$))
+      endif
+    until .todo$ == "" or .failsafe > 100
+
+    @trace: "Full result: """ + .return$ + """"
+    .argn = 0
   endif
-
-  #           Escape Index      Flag       Width       Precision       Length           Specifier
-  .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bdioxXfFeEgGaAsn]))"
-
-  @trace: "Formatting """ + .argv$[1] + """"
-  .todo$ = .argv$[1]
-  .return$ = ""
-
-  .i = 1
-  .failsafe = 0
-  repeat
-    .failsafe += 1
-
-    .prototype = index_regex(.todo$, .regex$)
-    if .prototype
-      .clear$ = left$(.todo$, .prototype - 1)
-      .todo$  = right$(.todo$, length(.todo$) - .prototype + 1)
-    else
-      .clear$ = .todo$
-      .todo$  = ""
-    endif
-
-    .clear$ = replace$(.clear$, "%%", "%", 0)
-    .clear$ = replace_regex$(.clear$, "(?<!\\)\\t", tab$, 0)
-    .clear$ = replace_regex$(.clear$, "(?<!\\)\\n", newline$, 0)
-    .clear$ = replace_regex$(.clear$, "\\\\", "\", 0)
-    .return$ = .return$ + .clear$
-
-    if .todo$ != ""
-      @_printf_parse: .todo$
-      @_printf_replace: .flag$, .width, .precision, .length$, .specifier$, .argv$[.index]
-      .return$ = .return$ + "'_printf_replace.return$'"
-      .todo$ = right$(.todo$, length(.todo$) - length(sprintf.full$))
-    endif
-  until .todo$ == "" or .failsafe > 100
-
-  @trace: "Full result: """ + .return$ + """"
-  .argn = 0
 endproc
 
 procedure _printf_parse: .todo$

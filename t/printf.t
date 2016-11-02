@@ -120,6 +120,9 @@ call diag:
 @mytest_n: "?",                     "%c",                -100
 @mytest_n: "?",                     "%c",                2097152
 
+if printf.system
+  @skip: 2, "Argument indices not supported"
+endif
 @mytest_ss: "Hot Pocket",            "%1$s %2$s",         "Hot", "Pocket"
 @mytest_nss: "12.0 Hot Pockets",     "%1$.1f %2$s %3$ss", 12.0, "Hot", "Pocket"
 
