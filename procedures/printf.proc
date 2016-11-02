@@ -1,0 +1,315 @@
+include ../../plugin_varargs/procedures/varargs.proc
+include ../../plugin_utils/procedures/utils.proc
+include ../../plugin_utils/procedures/base_conversions.proc
+
+include ../../plugin_utils/procedures/trace.proc
+trace.enable = 0
+
+procedure printf ()
+  for .i to .argn
+    sprintf.argv$[.i] = .argv$[.i]
+  endfor
+  sprintf.argn = .argn
+
+  @sprintf()
+
+  appendInfoLine: sprintf.return$
+endproc
+
+procedure fprintf ()
+  call @:sprintf: .arg$
+  appendFileLine: sprintf.return$
+endproc
+
+procedure sprintf ()
+  if .argn < 1
+    exitScript: "sprintf called with no arguments"
+  endif
+
+  #           Escape Index      Flag       Width       Precision       Length           Specifier
+  .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bdioxXfFeEgGaAsn]))"
+
+  @trace: "Formatting """ + .argv$[1] + """"
+  .todo$ = .argv$[1]
+  .return$ = ""
+
+  .i = 1
+  .failsafe = 0
+  repeat
+    .failsafe += 1
+
+    .prototype = index_regex(.todo$, .regex$)
+    if .prototype
+      .clear$ = left$(.todo$, .prototype - 1)
+      .todo$  = right$(.todo$, length(.todo$) - .prototype + 1)
+    else
+      .clear$ = .todo$
+      .todo$  = ""
+    endif
+
+    .clear$ = replace$(.clear$, "%%", "%", 0)
+    .clear$ = replace_regex$(.clear$, "(?<!\\)\\t", tab$, 0)
+    .clear$ = replace_regex$(.clear$, "(?<!\\)\\n", newline$, 0)
+    .clear$ = replace_regex$(.clear$, "\\\\", "\", 0)
+    .return$ = .return$ + .clear$
+
+    if .todo$ != ""
+      @_printf_parse: .todo$
+      @_printf_replace: .flag$, .width, .precision, .length$, .specifier$, .argv$[.index]
+      .return$ = .return$ + "'_printf_replace.return$'"
+      .todo$ = right$(.todo$, length(.todo$) - length(sprintf.full$))
+    endif
+  until .todo$ == "" or .failsafe > 100
+
+  @trace: "Full result: """ + .return$ + """"
+  .argn = 0
+endproc
+
+procedure _printf_parse: .todo$
+  .spec$ = replace_regex$(.todo$,
+    ... sprintf.regex$ + ".*", "\1|\2|\3|\4|\5|\7|\8", 1)
+
+  for .i to 7
+    split.return$[.i] = ""
+  endfor
+
+  @split: "|", .spec$
+  sprintf.full$      = split.return$[1]
+  sprintf.index$     = split.return$[2]
+  sprintf.flag$      = split.return$[3]
+  sprintf.width$     = split.return$[4]
+  sprintf.precision$ = split.return$[5]
+  sprintf.length$    = split.return$[6]
+  sprintf.specifier$ = split.return$[7]
+
+  if index(sprintf.width$, "*")
+    sprintf.i += 1
+    sprintf.width$ = sprintf.argv$[sprintf.i]
+  endif
+
+  if index(sprintf.precision$, "*")
+    sprintf.i += 1
+    sprintf.precision$ = sprintf.argv$[sprintf.i]
+  endif
+
+  # If the period is specified without an explicit value for precision,
+  # 0 is assumed.
+  if sprintf.precision$ == "."
+    sprintf.precision = 0
+  else
+    sprintf.precision = number(replace$(sprintf.precision$, ".", "", 1))
+  endif
+
+  if sprintf.specifier$ !="s" and sprintf.precision == undefined
+    sprintf.precision = 6
+  endif
+
+  sprintf.width = number(sprintf.width$)
+
+  if sprintf.index$ != ""
+    @trace: "Fetching argument at position " + string$(sprintf.index) + " (" + sprintf.index$ + ")"
+    sprintf.index = number(sprintf.index$) + 1
+  else
+    sprintf.i += 1
+    sprintf.index = sprintf.i
+    @trace: "Fetching argument at position " + string$(sprintf.index)
+  endif
+endproc
+
+procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .arg$
+
+  @trace: "  Argument: "  +         .arg$
+  @trace: "  Flag: "      +         .flag$
+  @trace: "  Width: "     + string$(.width)     + " (" + sprintf.width$     + ")"
+  @trace: "  Precision: " + string$(.precision) + " (" + sprintf.precision$ + ")"
+  @trace: "  Length: "    +         .length$
+  @trace: "  Specifier: " +         .specifier$
+
+  # The string is constructed from the following parts
+  .spad$ = "" ; Space padding
+  .sig$  = "" ; Sign
+  .zpad$ = "" ; Zero-padding
+  .int$  = "" ; Integer part
+  .dec$  = "" ; Decimal part
+  .exp$  = "" ; Exponent
+  .str$  = "" ; String
+
+  .arg = number(.arg$)
+  if .arg != undefined
+    if .arg < 0
+      .sig$ = "-"
+    endif
+    .arg = abs(.arg)
+  endif
+
+  # For integer specifiers, precision specifies the minimum number of digits
+  # to be written. The value is not truncated even if the result is longer.
+  if index("bdioxX", .specifier$)
+    .arg = .arg div 1
+  endif
+
+  # A precision of 0 means that no character is written for the value 0.
+  if index("bdioxX", .specifier$) and !.precision and .arg == 0
+    .return$ = ""
+  else
+    if .specifier$ == "s"
+
+      # For s, precision is the maximum number of characters to be printed
+      if .precision == undefined
+        .str$ = .arg$
+      else
+        .str$ = left$(.arg$, .precision)
+      endif
+
+    elsif .specifier$ == "b"
+
+      @dec2bin: .arg
+      .int$ = dec2bin.n$
+
+    elsif .specifier$ == "o"
+
+      @dec2oct: .arg
+      .int$ = dec2oct.n$
+
+    elsif index("xXaA", .specifier$)
+
+      @dec2hex: .arg
+      .int$ = replace_regex$(dec2hex.n$, "([^.]+)\..*", "\1", 1)
+
+      if index("aA", .specifier$)
+        .dec$ = extractLine$(dec2hex.n$, ".")
+      else
+        .dec$ = ""
+      endif
+
+    elsif index("difF", .specifier$)
+
+      .int$ = replace_regex$(string$(.arg), "([^.]+)\..*", "\1", 1)
+      .dec$ = extractLine$(fixed$(.arg, .precision), ".")
+      .dec$ = if index("di", .specifier$) then "" else left$(.dec$, .precision) fi
+
+      if index(.flag$, " ") and .sig$ != "-"
+        .sig$ = " "
+      endif
+
+    elsif index("eE", .specifier$)
+
+      .exp  = floor(log10(.arg))
+      .exp$ = string$(.exp)
+      .exp$ = if length(.exp$) == 1 then "0" else "" fi + .exp$
+
+      .exp$ = "e" + if .exp >= 0 then "+" else "-" fi + .exp$
+      .int = .arg / (10 ** .exp)
+
+      .int$ = string$(.int div 1)
+      .dec$ = extractLine$(string$(.int), ".")
+
+    elsif index("gG", .specifier$)
+
+      trace.level -= 1
+      @_printf_replace: .flag$, .width, .precision, .length$, "f", .arg$
+      trace.level += 1
+
+      if length(.int$) > .precision
+        @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
+      else
+        .dec$ = left$(.dec$, .precision - length(.int$))
+        .dec$ = replace_regex$(.dec$, "0*$", "", 0)
+      endif
+      .str$ = ""
+
+      .specifier$ = sprintf.specifier$
+
+    else
+
+      exitScript: "Unsupported printf specifier: ", .specifier$
+
+    endif
+
+    # For a, A, e, E, f and F specifiers, precision is the number of digits
+    # to be printed after the decimal point
+    if index("eEfF", .specifier$)
+      if .precision != undefined and .precision
+        while length(.dec$) < .precision
+          .dec$ = .dec$ + "0"
+        endwhile
+      endif
+    endif
+
+    # For g and G specifiers, precision is the maximum number of
+    # significant digits to be printed
+    if index("gG", .specifier$)
+      @trace: "Default precision: " + string$(.precision)
+
+      .d = .precision - length(.int$)
+      .d$ = left$(.dec$, .d)
+
+      @trace: "Left to print: " + string$(.d)
+
+      .dec$ = if .d$   != "" then .d$   else "" fi
+    endif
+
+  endif
+
+  .sig$ = if index(.flag$, "+") and .sig$ == "" then "+" else .sig$ fi
+
+  # For integer specifiers
+  if index("bdioxX", .specifier$) and sprintf.precision$ != ""
+    while length(.zpad$ + .int$) < .precision
+      .zpad$ = "0" + .zpad$
+    endwhile
+  endif
+
+  if .width != undefined
+    while length(.spad$) < .width
+      .spad$ = " " + .spad$
+    endwhile
+
+    if !index(.flag$, "-")
+      if sprintf.precision$ != ""
+        while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .precision
+          .zpad$ = "0" + .zpad$
+        endwhile
+      elsif index(.flag$, "0")
+        while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .width
+          .zpad$ = "0" + .zpad$
+        endwhile
+      endif
+    endif
+  endif
+
+  @trace: "Space pad: >" + .spad$ + "<"
+  @trace: "Sign:      >" + .sig$  + "<"
+  @trace: "Zero pad:  >" + .zpad$ + "<"
+  @trace: "Integer:   >" + .int$  + "<"
+  @trace: "Decimal:   >" + .dec$  + "<"
+  @trace: "Exponent:  >" + .exp$  + "<"
+
+  if .str$ == ""
+    .str$ = .sig$ + .zpad$ + .int$
+    if .dec$ != ""
+      .str$ = .str$ + "." + .dec$
+    endif
+
+    .str$ = .str$ + .exp$
+  endif
+
+  @trace: "String: " + .str$
+
+  if .width != undefined and .width > length(.str$)
+    if index(.flag$, "-")
+      .return$ = left$( .str$  + .spad$, .width)
+    else
+      .return$ = right$(.spad$ +  .str$, .width)
+    endif
+  else
+    .return$ = .str$
+  endif
+
+  if index("FAXEG", .specifier$)
+    @toUpper: .return$
+    .return$ = toUpper.return$
+  endif
+
+  @trace: "Result: " + .return$
+endproc

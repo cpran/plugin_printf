@@ -1,0 +1,16 @@
+---
+Plugin: printf
+Homepage: http://cpran.net/plugins/printf
+Version: 0.0.1
+Maintainer: José Joaquín Atria
+Depends:
+  praat: 5.0.0+
+  Plugins:
+    varargs: 0.0.3+
+Recommends:
+License: GPL3
+Readme: 
+Description:
+  Short: use printf-style commands for string formatting
+  Long: use printf-style commands for string formatting
+
