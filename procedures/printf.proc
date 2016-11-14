@@ -114,7 +114,6 @@ procedure sprintf ()
     until .todo$ == "" or .failsafe > 1000
 
     @trace: "Full result: """ + .return$ + """"
-    .argn = 0
   endif
 endproc
 
