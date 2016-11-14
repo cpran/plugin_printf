@@ -181,6 +181,7 @@ endproc
 
 procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .arg$
 
+  .done = 0
 
   # With integers, specifying precision discards the 0 flag
   if index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
@@ -215,12 +216,15 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   # to be written. The value is not truncated even if the result is longer.
   if index(sprintf.integers$, .specifier$)
     .arg = .arg div 1
+
+    # A precision of 0 means that no character is written for the value 0.
+    if !.precision and .arg == 0
+      .return$ = ""
+      .done = 1
+    endif
   endif
 
-  # A precision of 0 means that no character is written for the value 0.
-  if index("bdioxX", .specifier$) and !.precision and .arg == 0
-    .return$ = ""
-  else
+  if !.done
     if .specifier$ == "s"
 
       # For s, precision is the maximum number of characters to be printed
