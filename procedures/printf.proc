@@ -160,7 +160,7 @@ procedure _printf_parse: .todo$
   if sprintf.precision$ == "."
     sprintf.precision = 0
   else
-    sprintf.precision = number(replace$(sprintf.precision$, ".", "", 1))
+    sprintf.precision = extractNumber(sprintf.precision$, ".")
   endif
 
   if sprintf.specifier$ !="s" and sprintf.precision == undefined
