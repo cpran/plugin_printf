@@ -208,8 +208,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   if .arg != undefined
     if .arg < 0
       .sig$ = "-"
+      .arg *= -1
     endif
-    .arg = abs(.arg)
   endif
 
   # For integer specifiers, precision specifies the minimum number of digits
