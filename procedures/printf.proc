@@ -180,6 +180,10 @@ procedure _printf_parse: .todo$
     sprintf.index = sprintf.i
   endif
   @trace: "Fetching argument at position " + string$(sprintf.index)
+
+  if sprintf.index > sprintf.argn
+    exitScript: "Not enough arguments for format string"
+  endif
 endproc
 
 procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .arg$
