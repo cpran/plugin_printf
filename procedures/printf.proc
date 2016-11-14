@@ -198,6 +198,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   # The string is constructed from the following parts
   .spad$ = "" ; Space padding
   .sig$  = "" ; Sign
+  .hpad$ = "" ; Hash-padding
   .zpad$ = "" ; Zero-padding
   .int$  = "" ; Integer part
   .dec$  = "" ; Decimal part
@@ -363,33 +364,50 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     endwhile
   endif
 
+  if index(.flag$, "#") and .arg
+    if index("xX", .specifier$)
+      .hpad$ = "0x"
+    elsif index("b", .specifier$)
+      .hpad$ = "0b"
+    elsif .specifier$ == "o" and .zpad$ == ""
+      .hpad$ = "0"
+    endif
+  endif
+
   if .width != undefined
     while length(.spad$) < .width
       .spad$ = " " + .spad$
     endwhile
 
-    if !index(.flag$, "-")
-      if sprintf.precision$ != ""
-        while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .precision
-          .zpad$ = "0" + .zpad$
-        endwhile
-      elsif index(.flag$, "0")
-        while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .width
-          .zpad$ = "0" + .zpad$
-        endwhile
-      endif
+    if !index(.flag$, "-") and index(.flag$, "0")
+      while length(.sig$ + .hpad$ + .zpad$ + .int$ + "." + .dec$) <= .width
+        .zpad$ = .zpad$ + "0"
+      endwhile
+    endif
+  endif
+
+  if !index("gG", .specifier$)
+    if !index(.flag$, "-") and sprintf.precision$ != "" and .precision != undefined
+      while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .precision
+        .zpad$ = .zpad$ + "0"
+      endwhile
+    endif
+
+    if .dec$ != "" and .dec$ != "0" and .precision != undefined
+      .dec$ = extractLine$(fixed$(number("0." + .dec$), .precision), ".")
     endif
   endif
 
   @trace: "Space pad: >" + .spad$ + "<"
   @trace: "Sign:      >" + .sig$  + "<"
+  @trace: "Hash pad:  >" + .hpad$ + "<"
   @trace: "Zero pad:  >" + .zpad$ + "<"
   @trace: "Integer:   >" + .int$  + "<"
   @trace: "Decimal:   >" + .dec$  + "<"
   @trace: "Exponent:  >" + .exp$  + "<"
 
   if .str$ == ""
-    .str$ = .sig$ + .zpad$ + .int$
+    .str$ = .sig$ + .hpad$ + .zpad$ + .int$
     if .dec$ != ""
       .str$ = .str$ + "." + .dec$
     endif
