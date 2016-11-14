@@ -8,22 +8,23 @@ trace.enable = 0
 
 call try
 ... null$ = if windows then "NUL" else "/dev/null" fi     \n
-... runSystem: "printf " , """""", " 2 > " + null$
+... runSystem: "perl -v 2 > ", null$
 if try.catch
   printf.system = 0
 else
-  @trace: "Using system printf"
+  @trace: "Using perl printf"
   printf.system = 1
 endif
 
 procedure printf ()
   if printf.system
-    .cmd$ = """printf """
+    .cmd$ = ""
     for .i to .argn
       .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
     endfor
 
-    runSystem: '.cmd$'
+    runSystem: "perl ",
+      ... preferencesDirectory$ + "/plugin_printf/scripts/printf.pl " '.cmd$'
   else
     for .i to .argn
       sprintf.argv$[.i] = .argv$[.i]
@@ -38,12 +39,13 @@ endproc
 
 procedure fprintf ()
   if printf.system
-    .cmd$ = """printf """
+    .cmd$ = ""
     for .i to .argn
       .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
     endfor
 
-    runSystem: '.cmd$'
+    runSystem: "perl ",
+      ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl " '.cmd$'
   else
     call @:sprintf: .arg$
     appendFileLine: sprintf.return$
@@ -52,15 +54,16 @@ endproc
 
 procedure sprintf ()
   if printf.system
-    .cmd$ = """printf """
+    .cmd$ = ""
     for .i to .argn
       .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
     endfor
 
-    .null$ = if windows then "NUL" else "/dev/null" fi
-
     @mktempfile: "printfXXXXXXXX", "txt"
-    nocheck runSystem: '.cmd$', " > ", mktempfile.return$
+    runSystem: "perl ",
+      ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl ",
+      ... mktempfile.return$ '.cmd$'
+
     .return$ = readFile$(mktempfile.return$)
     deleteFile(mktempfile.return$)
   else
