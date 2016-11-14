@@ -78,7 +78,7 @@ procedure sprintf ()
     endif
 
     #           Escape Index      Flag       Width       Precision       Length           Specifier
-    .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdioxXfFeEgGaAsn]))"
+    .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdiouxXfFeEgGaAsn]))"
 
     @trace: "Formatting """ + .argv$[1] + """"
     .todo$ = .argv$[1]
@@ -234,16 +234,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .dec$ = ""
       endif
 
-    elsif index("difF", .specifier$)
-
-      .int$ = replace_regex$(string$(.arg), "([^.]+)\..*", "\1", 1)
-      .dec$ = extractLine$(fixed$(.arg, .precision), ".")
-      .dec$ = if index("di", .specifier$) then "" else left$(.dec$, .precision) fi
-
-      if index(.flag$, " ") and .sig$ != "-"
-        .sig$ = " "
-      endif
-
     elsif index("eE", .specifier$)
 
       .exp  = floor(log10(.arg))
@@ -271,6 +261,16 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .str$ = ""
 
       .specifier$ = sprintf.specifier$
+
+    elsif index("diufF", .specifier$)
+
+      .int$ = replace_regex$(string$(.arg), "([^.]+)\..*", "\1", 1)
+      .dec$ = extractLine$(fixed$(.arg, .precision), ".")
+      .dec$ = if index("di", .specifier$) then "" else left$(.dec$, .precision) fi
+
+      if index(.flag$, " ") and .sig$ != "-"
+        .sig$ = " "
+      endif
 
     else
 
