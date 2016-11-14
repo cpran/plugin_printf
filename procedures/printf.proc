@@ -289,13 +289,37 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .specifier$ = sprintf.specifier$
 
     elsif index("diufF", .specifier$)
+      if index("fF", .specifier$)
+        .int$ = string$(
+          ...   number(if .precision != undefined then
+          ...     fixed$(.arg, .precision) else string$(.arg) fi,
+          ...   ) div 1
+          ... )
 
-      .int$ = replace_regex$(string$(.arg), "([^.]+)\..*", "\1", 1)
-      .dec$ = extractLine$(fixed$(.arg, .precision), ".")
-      .dec$ = if index("di", .specifier$) then "" else left$(.dec$, .precision) fi
+        # The fixed$() function _always_ returns at least one significant digit
+        # When run on numbers like 0.01 with a precision of 1, it returns 0.01
+        # If .int$ is zero, rounding might have suffered from this
+        if .int$ == "0"
+          .int$ = string$(
+            ...   1 + number(if .precision != undefined then
+            ...     fixed$(.arg + 1, .precision) else string$(.arg) fi,
+            ...   ) div 1
+            ... )
+        endif
+      else
+        .int$ = replace_regex$(string$(.arg), "\..*", "", 1)
 
-      if index(.flag$, " ") and .sig$ != "-"
-        .sig$ = " "
+        # Number is unsigned
+        .sig$ = if .sig$ == "-" then "" else .sig$ fi
+      endif
+
+      # Approximate decimal part to precision, using fixed$() if defined
+      if .precision != undefined
+        .dec$ = extractLine$(fixed$(.arg, .precision), ".")
+        .dec$ = if index("diu", .specifier$) then "" else left$(.dec$, .precision) fi
+      else
+        .dec$ = extractLine$(string$(.arg), ".")
+        .dec$ = if index("diu", .specifier$) then "" else .dec$ fi
       endif
 
     else
