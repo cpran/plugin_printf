@@ -237,30 +237,23 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .str$ = left$(.arg$, .precision)
       endif
 
-    elsif .specifier$ == "b"
-      # an unsigned integer, in binary
-
-      @dec2bin: .arg
-      .int$ = dec2bin.n$
-
-    elsif .specifier$ == "o"
-      # an unsigned integer, in octal
-
-      @dec2oct: .arg
-      .int$ = dec2oct.n$
-
-    elsif index("xXaA", .specifier$)
+    elsif index("boxX", .specifier$)
+      # b  : an unsigned integer, in binary
+      # o  : an unsigned integer, in octal
       # xX : an unsigned integer, in hexadecimal
+
+      @dec2n: .arg div 1,
+        ... if .specifier$ == "b" then  2 else
+        ... if .specifier$ == "o" then  8 else
+        ...                            16 fi fi
+      .int$ = dec2n.n$
+
+    elsif index("aA", .specifier$)
       # aA : an hexadecimal floating point
 
-      @dec2hex: .arg
-      .int$ = replace_regex$(dec2hex.n$, "([^.]+)\..*", "\1", 1)
-
-      if index("aA", .specifier$)
-        .dec$ = extractLine$(dec2hex.n$, ".")
-      else
-        .dec$ = ""
-      endif
+      @dec2n: .arg, 16
+      .int$ = replace_regex$(dec2hex.n$, "\..*", "", 1)
+      .dec$ = extractLine$(dec2hex.n$, ".")
 
     elsif index("eE", .specifier$)
       # a floating-point number, in scientific notation
