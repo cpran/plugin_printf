@@ -111,7 +111,7 @@ procedure sprintf ()
         .return$ = .return$ + "'_printf_replace.return$'"
         .todo$ = right$(.todo$, length(.todo$) - length(sprintf.full$))
       endif
-    until .todo$ == "" or .failsafe > 100
+    until .todo$ == "" or .failsafe > 1000
 
     @trace: "Full result: """ + .return$ + """"
     .argn = 0
