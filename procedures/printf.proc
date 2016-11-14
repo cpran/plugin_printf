@@ -33,7 +33,7 @@ procedure printf ()
 
     @sprintf()
 
-    appendInfoLine: sprintf.return$
+    appendInfo: sprintf.return$
   endif
 endproc
 
@@ -48,7 +48,7 @@ procedure fprintf ()
       ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl " '.cmd$'
   else
     call @:sprintf: .arg$
-    appendFileLine: sprintf.return$
+    appendFile: .argv$[1], sprintf.return$
   endif
 endproc
 
