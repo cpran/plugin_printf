@@ -300,7 +300,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       if index("fF", .specifier$)
         .int$ = string$(
           ...   number(if .precision != undefined then
-          ...     fixed$(.arg, .precision) else string$(.arg) fi,
+          ...     fixed$(.arg, .precision) else string$(.arg) fi
           ...   ) div 1
           ... )
 
@@ -310,7 +310,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         if .int$ == "0"
           .int$ = string$(
             ...   1 + number(if .precision != undefined then
-            ...     fixed$(.arg + 1, .precision) else string$(.arg) fi,
+            ...     fixed$(.arg + 1, .precision) else string$(.arg) fi
             ...   ) div 1
             ... )
         endif
