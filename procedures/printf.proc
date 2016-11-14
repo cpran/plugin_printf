@@ -137,11 +137,22 @@ procedure _printf_parse: .todo$
   if index(sprintf.width$, "*")
     sprintf.i += 1
     sprintf.width$ = sprintf.argv$[sprintf.i]
+
+    .w = number(sprintf.width$)
+    if .w != undefined and .w < 0
+      sprintf.flag$ = sprintf.flag$ + "-"
+      sprintf.width$ = string$(.w * -1)
+    endif
   endif
 
   if index(sprintf.precision$, "*")
     sprintf.i += 1
     sprintf.precision$ = sprintf.argv$[sprintf.i]
+
+    .p = number(sprintf.precision$)
+    if .p != undefined and .p < 0
+      sprintf.precision$ = 0
+    endif
   endif
 
   # If the period is specified without an explicit value for precision,
