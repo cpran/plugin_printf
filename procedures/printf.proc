@@ -324,7 +324,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     else
 
-      exitScript: "Unsupported printf specifier: ", .specifier$
+      exitScript: "Unsupported format specifier: ", .specifier$
 
     endif
 
