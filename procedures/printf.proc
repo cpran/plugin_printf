@@ -20,11 +20,12 @@ procedure printf ()
   if printf.system
     .cmd$ = ""
     for .i to .argn
-      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+      .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
+    .cmd$ = .cmd$ - ", "
 
     runSystem: "perl ",
-      ... preferencesDirectory$ + "/plugin_printf/scripts/printf.pl " '.cmd$'
+      ... preferencesDirectory$ + "/plugin_printf/scripts/printf.pl ", '.cmd$'
   else
     for .i to .argn
       sprintf.argv$[.i] = .argv$[.i]
@@ -41,11 +42,12 @@ procedure fprintf ()
   if printf.system
     .cmd$ = ""
     for .i to .argn
-      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+      .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
+    .cmd$ = .cmd$ - ", "
 
     runSystem: "perl ",
-      ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl " '.cmd$'
+      ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl ", '.cmd$'
   else
     for .i from 2 to .argn
       sprintf.argv$[.i - 1] = .argv$[.i]
@@ -62,13 +64,14 @@ procedure sprintf ()
   if printf.system
     .cmd$ = ""
     for .i to .argn
-      .cmd$ = .cmd$ + ", "" """"" + .argv$[.i] + """"" """
+      .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
+    .cmd$ = .cmd$ - ", "
 
     @mktempfile: "printfXXXXXXXX", "txt"
     runSystem: "perl ",
       ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl ",
-      ... mktempfile.return$ '.cmd$'
+      ... mktempfile.return$, '.cmd$'
 
     .return$ = readFile$(mktempfile.return$)
     deleteFile(mktempfile.return$)
