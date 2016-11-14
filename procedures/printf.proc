@@ -410,7 +410,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     .return$ = .str$
   endif
 
-  if index("FAXEG", .specifier$)
+  if index_regex(.specifier$, "[A-Z]")
     @toUpper: .return$
     .return$ = toUpper.return$
   endif
