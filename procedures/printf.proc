@@ -47,7 +47,13 @@ procedure fprintf ()
     runSystem: "perl ",
       ... preferencesDirectory$ + "/plugin_printf/scripts/fprintf.pl " '.cmd$'
   else
-    call @:sprintf: .arg$
+    for .i from 2 to .argn
+      sprintf.argv$[.i - 1] = .argv$[.i]
+    endfor
+    sprintf.argn = .argn - 1
+
+    @sprintf()
+
     appendFile: .argv$[1], sprintf.return$
   endif
 endproc
