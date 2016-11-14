@@ -357,9 +357,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   endif
 
   # For integer specifiers
-  if index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
+  if .precision != undefined and index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
     while length(.zpad$ + .int$) < .precision
-      .zpad$ = "0" + .zpad$
+      .zpad$ = .zpad$ + "0"
     endwhile
   endif
 
