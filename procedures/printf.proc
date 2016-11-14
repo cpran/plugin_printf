@@ -268,10 +268,15 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .dec$ = extractLine$(string$(.int), ".")
 
     elsif index("gG", .specifier$)
+      .oldp = .precision
+      .oldw = .width
 
       trace.level -= 1
-      @_printf_replace: .flag$, .width, .precision, .length$, "f", .arg$
+      @_printf_replace: .flag$, undefined, undefined, .length$, "f", .arg$
       trace.level += 1
+
+      .precision = .oldp
+      .width     = .oldw
 
       if length(.int$) > .precision
         @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
