@@ -275,29 +275,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .int$ = string$(.int div 1)
       .dec$ = extractLine$(string$(.int), ".")
 
-    elsif index("gG", .specifier$)
-      # a floating-point number, in %e or %f notation
-
-      .oldp = .precision
-      .oldw = .width
-
-      trace.level -= 1
-      @_printf_replace: .flag$, undefined, undefined, .length$, "f", .arg$
-      trace.level += 1
-
-      .precision = .oldp
-      .width     = .oldw
-
-      if length(.int$) > .precision
-        @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
-      else
-        .dec$ = left$(.dec$, .precision - length(.int$))
-        .dec$ = replace_regex$(.dec$, "0*$", "", 0)
-      endif
-      .str$ = ""
-
-      .specifier$ = sprintf.specifier$
-
     elsif index("diufF", .specifier$)
       # d  : a signed integer, in decimal
       # i  : a synonym for %d
@@ -334,10 +311,31 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .dec$ = if index("diu", .specifier$) then "" else .dec$ fi
       endif
 
+    elsif index("gG", .specifier$)
+      # a floating-point number, in %e or %f notation
+
+      .oldp = .precision
+      .oldw = .width
+
+      trace.level -= 1
+      @_printf_replace: .flag$, undefined, undefined, .length$, "f", .arg$
+      trace.level += 1
+
+      .precision = .oldp
+      .width     = .oldw
+
+      if length(.int$) > .precision
+        @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
+      else
+        .dec$ = left$(.dec$, .precision - length(.int$))
+        .dec$ = replace_regex$(.dec$, "0*$", "", 0)
+      endif
+      .str$ = ""
+
+      .specifier$ = sprintf.specifier$
+
     else
-
       exitScript: "Unsupported format specifier: ", .specifier$
-
     endif
 
     # For a, A, e, E, f and F specifiers, precision is the number of digits
