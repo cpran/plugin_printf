@@ -79,6 +79,7 @@ procedure sprintf ()
 
     #           Escape Index      Flag       Width       Precision       Length           Specifier
     .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdiouxXfFeEgGaAsn]))"
+    .integers$ = "bidouxX"
 
     @trace: "Formatting """ + .argv$[1] + """"
     .todo$ = .argv$[1]
@@ -170,12 +171,18 @@ endproc
 
 procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .arg$
 
-  @trace: "  Argument: "  +         .arg$
-  @trace: "  Flag: "      +         .flag$
-  @trace: "  Width: "     + string$(.width)     + " (" + sprintf.width$     + ")"
-  @trace: "  Precision: " + string$(.precision) + " (" + sprintf.precision$ + ")"
-  @trace: "  Length: "    +         .length$
-  @trace: "  Specifier: " +         .specifier$
+
+  # With integers, specifying precision discards the 0 flag
+  if index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
+    .flag$ = replace$(.flag$, "0", "", 0)
+  endif
+
+  @trace: "  Argument:  |" +         .arg$       + "|"
+  @trace: "  Flag:      |" +         .flag$      + "|"
+  @trace: "  Width:     |" + string$(.width)     + "|" + " (" + sprintf.width$     + ")"
+  @trace: "  Precision: |" + string$(.precision) + "|" + " (" + sprintf.precision$ + ")"
+  @trace: "  Length:    |" +         .length$    + "|"
+  @trace: "  Specifier: |" +         .specifier$ + "|"
 
   # The string is constructed from the following parts
   .spad$ = "" ; Space padding
@@ -196,7 +203,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
   # For integer specifiers, precision specifies the minimum number of digits
   # to be written. The value is not truncated even if the result is longer.
-  if index("bdioxX", .specifier$)
+  if index(sprintf.integers$, .specifier$)
     .arg = .arg div 1
   endif
 
@@ -306,7 +313,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   .sig$ = if index(.flag$, "+") and .sig$ == "" then "+" else .sig$ fi
 
   # For integer specifiers
-  if index("bdioxX", .specifier$) and sprintf.precision$ != ""
+  if index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
     while length(.zpad$ + .int$) < .precision
       .zpad$ = "0" + .zpad$
     endwhile
