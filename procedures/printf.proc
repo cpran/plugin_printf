@@ -361,6 +361,27 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       endif
     endif
 
+    # Padding
+    # Zero padding
+    if index(sprintf.integers$, .specifier$)
+      if index(.flag$, "0") and !index(.flag$, "-") and .width != undefined
+        # Use zeros, not spaces, to right-justify with the 0 flag
+        while length(.sig$ + .zpad$ + .int$) < .width
+          .zpad$ = .zpad$ + "0"
+        endwhile
+        .spad$ = replace$(.spad$, " ", "0", 0)
+      else
+        # For integer conversions, specifying a precision implies that the
+        # output of the number itself should be zero-padded to this width,
+        # where the 0 flag is ignored:
+        if .precision != undefined and sprintf.precision$ != ""
+          while length(.zpad$ + .int$) < .precision
+            .zpad$ = .zpad$ + "0"
+          endwhile
+        endif
+      endif
+    endif
+
     # Hash padding
     if index(.flag$, "#") and .arg
       if index("xX", .specifier$)
@@ -397,29 +418,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
   endif
 
-
-  # For integer specifiers
-  if .precision != undefined and index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
-    while length(.zpad$ + .int$) < .precision
-      .zpad$ = .zpad$ + "0"
-    endwhile
-  endif
-
-  if .width != undefined
-
-    if !index(.flag$, "-") and index(.flag$, "0")
-      while length(.sig$ + .hpad$ + .zpad$ + .int$ + "." + .dec$) <= .width
-        .zpad$ = .zpad$ + "0"
-      endwhile
-    endif
-  endif
-
-  if !index("gG", .specifier$)
-    if !index(.flag$, "-") and sprintf.precision$ != "" and .precision != undefined
-      while length(.sig$ + .zpad$ + .int$ + "." + .dec$) <= .precision
-        .zpad$ = .zpad$ + "0"
-      endwhile
-    endif
 
     if .dec$ != "" and .dec$ != "0" and .precision != undefined
       .dec$ = extractLine$(fixed$(number("0." + .dec$), .precision), ".")
