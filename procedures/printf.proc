@@ -167,9 +167,11 @@ procedure _printf_parse: .todo$
 
     .p = number(sprintf.precision$)
     if .p != undefined and .p < 0
-      sprintf.precision$ = 0
+      sprintf.precision = undefined
+      sprintf.precision$ = ""
+    else
+      sprintf.precision$ = "." + sprintf.precision$
     endif
-    sprintf.precision$ = "." + sprintf.precision$
   endif
 
   # If the period is specified without an explicit value for precision,
