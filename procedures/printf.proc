@@ -335,9 +335,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       if length(.int$) > .precision
         @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
       elsif length(.int$) + length(.dec$) > .precision
-        .num$ = fixed$(number(.int$ + "." + .dec$), .precision - 1)
+        .num$ = fixed$(number(.int$ + "." + .dec$), .precision - length(.int$))
         .int$ = string$(number(.num$) div 1)
-        .dec$ = string$(number(.num$) mod 1)
+        .dec$ = extractLine$(.num$, ".")
         .dec$ = if .dec$ == "0" then "" else .dec$ fi
       endif
 

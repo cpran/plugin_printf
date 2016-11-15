@@ -190,6 +190,7 @@ for i to 2
   call @:mytest: "8.6",                    "%1g",            8.6
   call @:mytest: "8.6",                    "%1g",            8.6
   call @:mytest: "8.6",                    "%.2g",           8.6
+  call @:mytest: "8",                      "%.2g",           8.04
   call @:mytest: "9",                      "%.1g",           8.6
   call @:mytest: "  9",                    "%3.1g",          8.6
 
