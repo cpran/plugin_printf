@@ -5,7 +5,7 @@ test.fatal = 0
 has_system = printf.system
 printf.system = 0
 
-@no_plan()
+@plan: 786
 
 for i to 2
   if printf.system and !has_system
