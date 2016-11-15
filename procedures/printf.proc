@@ -16,11 +16,16 @@ if !variableExists("printf.system")
   else
     # @trace: "Using perl printf"
     printf.system = 1
+    @hasGUI()
+    printf.gui = hasGUI.return
   endif
 endif
 
 procedure printf ()
-  if printf.system
+  if printf.system and !printf.gui
+    # The system call will print to STDOUT
+    # If this is a GUI instance, STDOUT is not visible, and we need to capture
+    # output and deliver it to the info window internally
     .cmd$ = ""
     for .i to .argn
       .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
