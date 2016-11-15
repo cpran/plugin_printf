@@ -207,6 +207,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   @trace: "  Length:    |" +         .length$    + "|"
   @trace: "  Specifier: |" +         .specifier$ + "|"
 
+  .pad$  = " " ; Character to use for padding
+
   # The string is constructed from the following parts
   .spad$ = "" ; Space padding
   .sig$  = "" ; Sign
@@ -216,14 +218,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   .dec$  = "" ; Decimal part
   .exp$  = "" ; Exponent
   .str$  = "" ; String
-
-  # Initialise full space padding
-  # This will later be trimmed to the needed length
-  if .width != undefined
-    while length(.spad$) < .width
-      .spad$ = .spad$ + " "
-    endwhile
-  endif
 
   # Prepare numeric argument
   .arg = number(.arg$)
@@ -442,7 +436,12 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
   @trace: "String: " + .str$
 
+  # Pad with spaces
   if .width != undefined and .width > length(.str$)
+    while length(.spad$) < .width
+      .spad$ = .spad$ + .pad$
+    endwhile
+
     if index(.flag$, "-")
       .return$ = left$( .str$  + .spad$, .width)
     else
