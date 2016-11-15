@@ -380,6 +380,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .hpad$ = "0"
       endif
     endif
+    @trace: "Hash pad:  >" + .hpad$ + "<"
 
     # Zero padding
     if index(sprintf.integers$, .specifier$)
@@ -406,9 +407,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     if index(.flag$, "#") and index("o", .specifier$) and .zpad$ != ""
       .zpad$ = .zpad$ - "0"
     endif
-
-    @trace: "Space pad: >" + .spad$ + "<"
-    @trace: "Hash pad:  >" + .hpad$ + "<"
     @trace: "Zero pad:  >" + .zpad$ + "<"
   endif
 
@@ -421,7 +419,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     .str$ = .str$ + .exp$
   endif
-
   @trace: "String: " + .str$
 
   # Pad with spaces
