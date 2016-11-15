@@ -3,22 +3,18 @@ include ../../plugin_printf/procedures/printf.proc
 
 test.fatal = 0
 has_system = printf.system
-
 printf.system = 0
 
 @no_plan()
 
-run = 1
-
 for i to 2
-
   if printf.system and !has_system
-    @skip_all: "No system printf found"
+    @skip_all: "No support for system printf (perl)"
   endif
 
   call @:mytest: "0.33",                   "%.*f",                2, 0.33333333
-  call @:mytest:  "foo",                   "%.3s",                "foobar"
-  call @:mytest:  "     00004",            "%10.5d",              4
+  call @:mytest: "foo",                    "%.3s",                "foobar"
+  call @:mytest: "     00004",             "%10.5d",              4
   call @:mytest: " 42",                    "% d",                 42
 
   call @:mytest: "-42",                    "% d",                 -42
@@ -75,11 +71,13 @@ for i to 2
 
   @todo: 1, "Undefined test"
   call @:mytest: "042.90",                 "%06.2f",              42.8952
-  call diag:
-  ... Technically, this test is undefined according to the      'newline$'
-  ... doc. "If a precision is given with a numeric              'newline$'
-  ... conversion (d, i, o, u, x, and X), the 0 flag is ignored. 'newline$'
-  ... For other conversions, the behavior is undefined."
+  if !(printf.system and !has_system)
+    call diag:
+    ... Technically, this test is undefined according to the      'newline$'
+    ... doc. "If a precision is given with a numeric              'newline$'
+    ... conversion (d, i, o, u, x, and X), the 0 flag is ignored. 'newline$'
+    ... For other conversions, the behavior is undefined."
+  endif
 
   call @:mytest: "+42.90",                 "%+6.2f",              42.8952
   call @:mytest: "42.8952000000",          "%5.10f",              42.8952
