@@ -326,9 +326,11 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
       if length(.int$) > .precision
         @_printf_replace: .flag$, .width, .precision - 1, .length$, "e", .arg$
-      else
-        .dec$ = left$(.dec$, .precision - length(.int$))
-        .dec$ = replace_regex$(.dec$, "0*$", "", 0)
+      elsif length(.int$) + length(.dec$) > .precision
+        .num$ = fixed$(number(.int$ + "." + .dec$), .precision - 1)
+        .int$ = string$(number(.num$) div 1)
+        .dec$ = string$(number(.num$) mod 1)
+        .dec$ = if .dec$ == "0" then "" else .dec$ fi
       endif
       .str$ = ""
 
