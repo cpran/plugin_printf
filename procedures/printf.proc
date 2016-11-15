@@ -16,16 +16,23 @@ if !variableExists("printf.system")
   else
     # @trace: "Using perl printf"
     printf.system = 1
-    @hasGUI()
-    printf.gui = hasGUI.return
   endif
 endif
 
+if !variableExists("printf.stdout")
+  printf.stdout = 0
+endif
+
 procedure printf ()
-  if printf.system and !printf.gui
-    # The system call will print to STDOUT
-    # If this is a GUI instance, STDOUT is not visible, and we need to capture
-    # output and deliver it to the info window internally
+  # A system call would normally print to STDOUT instead of to the info window
+  # In order to maintain a predictable behaviour, this procedure will
+  # redirect that output to the info window, but this requires a file I/O
+  # operation which could become a bottleneck.
+  #
+  # If this is not desirable, it can be disabled by setting the `printf.stdout`
+  # variable to a true value.
+  #
+  if printf.system and printf.stdout
     .cmd$ = ""
     .argv$[1] = replace_regex$(.argv$[1], "(?<!\\)\$", "\\$", 0)
     for .i to .argn
