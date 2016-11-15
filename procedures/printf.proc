@@ -215,7 +215,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   # @trace: "  Length:    |" +         .length$    + "|"
   # @trace: "  Specifier: |" +         .specifier$ + "|"
 
-  .pad$  = " " ; Character to use for padding
+  .pad$  = if index(.flag$, "0") and !index(.flag$, "-") then
+    ... "0" else " " fi ; Character to use for padding
 
   # The string is constructed from the following parts
   .spad$ = "" ; Space padding
@@ -405,7 +406,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
           while length(.sig$ + .hpad$ + .zpad$ + .int$) < .width
             .zpad$ = .zpad$ + "0"
           endwhile
-          .pad$ = "0"
         endif
       endif
 
