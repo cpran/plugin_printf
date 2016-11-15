@@ -426,15 +426,12 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     @trace: "Hash pad:  >" + .hpad$ + "<"
     @trace: "Zero pad:  >" + .zpad$ + "<"
 
-    if .dec$ != "" and .dec$ != "0" and .precision != undefined
-      .dec$ = extractLine$(fixed$(number("0." + .dec$), .precision), ".")
-    endif
-  endif
+    if .str$ == ""
+      .str$ = .sig$ + .hpad$ + .zpad$ + .int$
+      if .dec$ != ""
+        .str$ = .str$ + "." + .dec$
+      endif
 
-  if .str$ == ""
-    .str$ = .sig$ + .hpad$ + .zpad$ + .int$
-    if .dec$ != ""
-      .str$ = .str$ + "." + .dec$
     endif
 
     .str$ = .str$ + .exp$
