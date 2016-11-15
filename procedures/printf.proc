@@ -350,6 +350,17 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       endif
     endif
 
+    # Signage
+    if index(sprintf.unsigned$, .specifier$)
+      .sig$ = ""
+    elsif .sig$ != "-"
+      if index(.flag$, "+")
+        .sig$ = "+"
+      elsif index(.flag$, " ")
+        .sig$ = " "
+      endif
+    endif
+
     # For a, A, e, E, f and F specifiers, precision is the number of digits
     # to be printed after the decimal point
     if index("eEfF", .specifier$)
@@ -375,11 +386,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
   endif
 
-  if index(sprintf.unsigned$, .specifier$)
-    .sig$ = ""
-  else
-    .sig$ = if index(.flag$, "+") and .sig$ != "-" then "+" else .sig$ fi
-  endif
 
   # For integer specifiers
   if .precision != undefined and index(sprintf.integers$, .specifier$) and sprintf.precision$ != ""
