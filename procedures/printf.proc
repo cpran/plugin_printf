@@ -342,8 +342,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .num$ = fixed$(number(.int$ + "." + .dec$), .precision - length(.int$))
         .int$ = string$(number(.num$) div 1)
         .dec$ = extractLine$(.num$, ".")
-        .dec$ = if .dec$ == "0" then "" else .dec$ fi
       endif
+      .dec$ = if index_regex(.dec$, "0+") then "" else .dec$ fi
 
       # Previous calls to _printf_replace set .str$
       # It needs to be cleared so rest of formating doesn't assume
