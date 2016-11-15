@@ -241,6 +241,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   endif
 
   if !.done
+    # Begin formatting
+
+    # Specification and approximation of argument
     if .specifier$ == "s"
       # a string
 
@@ -332,6 +335,10 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .dec$ = string$(number(.num$) mod 1)
         .dec$ = if .dec$ == "0" then "" else .dec$ fi
       endif
+
+      # Previous calls to _printf_replace set .str$
+      # It needs to be cleared so rest of formating doesn't assume
+      # it has already been formatted
       .str$ = ""
 
       .specifier$ = sprintf.specifier$
@@ -436,6 +443,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     .return$ = .str$
   endif
 
+  # Process upper-case specifiers
   if index_regex(.specifier$, "[A-Z]")
     @toUpper: .return$
     .return$ = toUpper.return$
