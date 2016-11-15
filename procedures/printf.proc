@@ -6,14 +6,17 @@ include ../../plugin_utils/procedures/try.proc
 include ../../plugin_utils/procedures/trace.proc
 trace.enable = 0
 
-call try
-... null$ = if windows then "NUL" else "/dev/null" fi     \n
-... runSystem: "perl -v 2 > ", null$
-if try.catch
-  printf.system = 0
-else
-  @trace: "Using perl printf"
-  printf.system = 1
+if !variableExists("printf.system")
+  call try
+    ... null$ = if windows then "NUL" else "/dev/null" fi     \n
+    ... runSystem: "perl -v 2 > ", null$
+
+  if try.catch
+    printf.system = 0
+  else
+    @trace: "Using perl printf"
+    printf.system = 1
+  endif
 endif
 
 procedure printf ()
