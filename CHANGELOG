@@ -1,3 +1,7 @@
 - next: # unreleased
+  - Fix:
+    - If using a GUI and the system printf, capture STDOUT
+      and redirect it to the info window
+    - Make perl scripts replace all newlines and tabs
 - v0.0.1:
   - Initial release
