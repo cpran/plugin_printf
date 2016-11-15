@@ -350,6 +350,10 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       endif
     endif
 
+    @trace: "Integer:   >" + .int$  + "<"
+    @trace: "Decimal:   >" + .dec$  + "<"
+    @trace: "Exponent:  >" + .exp$  + "<"
+
     # Signage
     if index(sprintf.unsigned$, .specifier$)
       .sig$ = ""
@@ -360,6 +364,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .sig$ = " "
       endif
     endif
+
+    @trace: "Sign:      >" + .sig$  + "<"
 
     # Padding
     # Zero padding
@@ -416,21 +422,14 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .dec$ = if .d$   != "" then .d$   else "" fi
     endif
 
-  endif
-
+    @trace: "Space pad: >" + .spad$ + "<"
+    @trace: "Hash pad:  >" + .hpad$ + "<"
+    @trace: "Zero pad:  >" + .zpad$ + "<"
 
     if .dec$ != "" and .dec$ != "0" and .precision != undefined
       .dec$ = extractLine$(fixed$(number("0." + .dec$), .precision), ".")
     endif
   endif
-
-  @trace: "Space pad: >" + .spad$ + "<"
-  @trace: "Sign:      >" + .sig$  + "<"
-  @trace: "Hash pad:  >" + .hpad$ + "<"
-  @trace: "Zero pad:  >" + .zpad$ + "<"
-  @trace: "Integer:   >" + .int$  + "<"
-  @trace: "Decimal:   >" + .dec$  + "<"
-  @trace: "Exponent:  >" + .exp$  + "<"
 
   if .str$ == ""
     .str$ = .sig$ + .hpad$ + .zpad$ + .int$
