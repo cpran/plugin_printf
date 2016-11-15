@@ -302,7 +302,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         # If .int$ is zero, rounding might have suffered from this
         if .int$ == "0"
           .int$ = string$(
-            ...   1 + number(if .precision != undefined then
+            ...   1 - number(if .precision != undefined then
             ...     fixed$(.arg + 1, .precision) else string$(.arg) fi
             ...   ) div 1
             ... )
