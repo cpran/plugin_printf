@@ -93,7 +93,7 @@ procedure sprintf ()
 
     #           Escape Index      Flag       Width       Precision       Length           Specifier
     .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdiouxXfFeEgGaAsn]))"
-    .unsigned$ = "bouxX"
+    .unsigned$ = "bBouxX"
     .integers$ = .unsigned$ + "id"
     .doubles$  = "eEfF"
 
@@ -263,15 +263,15 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .str$ = left$(.arg$, .precision)
       endif
 
-    elsif index("boxX", .specifier$)
+    elsif index("bBoxX", .specifier$)
       # b  : an unsigned integer, in binary
       # o  : an unsigned integer, in octal
       # xX : an unsigned integer, in hexadecimal
 
       @dec2n: .arg div 1,
-        ... if .specifier$ == "b" then  2 else
-        ... if .specifier$ == "o" then  8 else
-        ...                            16 fi fi
+        ... if index("bB", .specifier$) then  2 else
+        ... if index("o",  .specifier$) then  8 else
+        ...                                  16 fi fi
       .int$ = dec2n.n$
 
     elsif index("aA", .specifier$)
@@ -390,7 +390,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     if index(.flag$, "#") and .arg
       if index("xX", .specifier$)
         .hpad$ = "0x"
-      elsif index("b", .specifier$)
+      elsif index("bB", .specifier$)
         .hpad$ = "0b"
       elsif .specifier$ == "o"
         .hpad$ = "0"
