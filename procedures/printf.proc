@@ -235,7 +235,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     # A precision of 0 means that no character is written for the value 0.
     if !.precision and .arg == 0
-      .return$ = ""
+      .str$ = ""
       .done = 1
     endif
   endif
@@ -337,7 +337,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     else
       exitScript: "Unsupported format specifier: ", .specifier$
     endif
+  endif
 
+  if !index("s", .specifier$)
     if index(sprintf.doubles$, .specifier$)
       if .precision != undefined
         .dec$ = extractLine$(fixed$(.num, .precision), ".")
@@ -422,13 +424,13 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     @trace: "Space pad: >" + .spad$ + "<"
     @trace: "Hash pad:  >" + .hpad$ + "<"
     @trace: "Zero pad:  >" + .zpad$ + "<"
+  endif
 
-    if .str$ == ""
-      .str$ = .sig$ + .hpad$ + .zpad$ + .int$
-      if .dec$ != ""
-        .str$ = .str$ + "." + .dec$
-      endif
-
+  # Construct string from components
+  if .str$ == ""
+    .str$ = .sig$ + .hpad$ + .zpad$ + .int$
+    if .dec$ != ""
+      .str$ = .str$ + "." + .dec$
     endif
 
     .str$ = .str$ + .exp$
