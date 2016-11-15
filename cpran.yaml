@@ -1,7 +1,7 @@
 ---
 Plugin: printf
 Homepage: http://cpran.net/plugins/printf
-Version: 0.0.1
+Version: 0.0.2
 Maintainer: José Joaquín Atria
 Depends:
   praat: 5.0.0+
