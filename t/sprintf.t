@@ -501,11 +501,15 @@ endfor
 procedure mytest ()
   .expected$ = .argv$[1]
   .format$ = .argv$[2]
-  .args$ = extractLine$(.args$, ",")
-
-  call @:sprintf: 'mytest.args$'
-
   .msg$ = replace$(.format$, "#", "\#", 0)
+
+  if plan.skip != undefined and !plan.skip
+    .args$ = extractLine$(.args$, ",")
+    call @:sprintf: 'mytest.args$'
+  else
+    sprintf.return$ = ""
+  endif
+
   @is$: sprintf.return$, .expected$,
     ... if printf.system then "(system) " else "(PP) " fi + .msg$
 endproc
