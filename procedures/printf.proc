@@ -310,6 +310,8 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
         .num = .arg
       else
+        # Rounding here does not do approximation, so we don't used fixed$()
+        .int$ = replace_regex$(string$(.arg), "\..*", "", 1)
       endif
 
     elsif index("gG", .specifier$)
