@@ -27,6 +27,7 @@ procedure printf ()
     # If this is a GUI instance, STDOUT is not visible, and we need to capture
     # output and deliver it to the info window internally
     .cmd$ = ""
+    .argv$[1] = replace_regex$(.argv$[1], "(?<!\\)\$", "\\$", 0)
     for .i to .argn
       .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
@@ -49,6 +50,7 @@ endproc
 procedure fprintf ()
   if printf.system
     .cmd$ = ""
+    .argv$[1] = replace_regex$(.argv$[1], "(?<!\\)\$", "\\$", 0)
     for .i to .argn
       .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
@@ -71,6 +73,7 @@ endproc
 procedure sprintf ()
   if printf.system
     .cmd$ = ""
+    .argv$[1] = replace_regex$(.argv$[1], "(?<!\\)\$", "\\$", 0)
     for .i to .argn
       .cmd$ = .cmd$ + """ """"" + .argv$[.i] + """"" "", "
     endfor
