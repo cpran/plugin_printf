@@ -369,25 +369,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     @trace: "Sign:      >" + .sig$  + "<"
 
     # Padding
-    # Zero padding
-    if index(sprintf.integers$, .specifier$)
-      if index(.flag$, "0") and !index(.flag$, "-") and .width != undefined
-        # Use zeros, not spaces, to right-justify with the 0 flag
-        while length(.sig$ + .zpad$ + .int$) < .width
-          .zpad$ = .zpad$ + "0"
-        endwhile
-        .spad$ = replace$(.spad$, " ", "0", 0)
-      else
-        # For integer conversions, specifying a precision implies that the
-        # output of the number itself should be zero-padded to this width,
-        # where the 0 flag is ignored:
-        if .precision != undefined and sprintf.precision$ != ""
-          while length(.zpad$ + .int$) < .precision
-            .zpad$ = .zpad$ + "0"
-          endwhile
-        endif
-      endif
-    endif
 
     # Hash padding
     if index(.flag$, "#") and .arg
@@ -395,32 +376,35 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .hpad$ = "0x"
       elsif index("b", .specifier$)
         .hpad$ = "0b"
-      elsif .specifier$ == "o" and .zpad$ == ""
+      elsif .specifier$ == "o"
         .hpad$ = "0"
       endif
     endif
 
-    # For a, A, e, E, f and F specifiers, precision is the number of digits
-    # to be printed after the decimal point
-    if index("eEfF", .specifier$)
-      if .precision != undefined and .precision
-        while length(.dec$) < .precision
-          .dec$ = .dec$ + "0"
+    # Zero padding
+    if index(sprintf.integers$, .specifier$)
+      if .width != undefined
+        if index(.flag$, "0") and !index(.flag$, "-")
+          # Use zeros, not spaces, to right-justify with the 0 flag
+          while length(.sig$ + .hpad$ + .zpad$ + .int$) < .width
+            .zpad$ = .zpad$ + "0"
+          endwhile
+          .pad$ = "0"
+        endif
+      endif
+
+      if .precision != undefined and sprintf.precision$ != ""
+        # For integer conversions, specifying a precision implies that the
+        # output of the number itself should be zero-padded to this width,
+        # where the 0 flag is ignored:
+        while length(.zpad$ + .int$) < .precision
+          .zpad$ = .zpad$ + "0"
         endwhile
       endif
     endif
 
-    # For g and G specifiers, precision is the maximum number of
-    # significant digits to be printed
-    if index("gG", .specifier$)
-      @trace: "Default precision: " + string$(.precision)
-
-      .d = .precision - length(.int$)
-      .d$ = left$(.dec$, .d)
-
-      @trace: "Left to print: " + string$(.d)
-
-      .dec$ = if .d$   != "" then .d$   else "" fi
+    if index(.flag$, "#") and index("o", .specifier$) and .zpad$ != ""
+      .zpad$ = .zpad$ - "0"
     endif
 
     @trace: "Space pad: >" + .spad$ + "<"
