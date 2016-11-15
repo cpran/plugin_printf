@@ -214,6 +214,14 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   .exp$  = "" ; Exponent
   .str$  = "" ; String
 
+  # Initialise full space padding
+  # This will later be trimmed to the needed length
+  if .width != undefined
+    while length(.spad$) < .width
+      .spad$ = .spad$ + " "
+    endwhile
+  endif
+
   # Prepare numeric argument
   .arg = number(.arg$)
   if .arg != undefined
@@ -389,9 +397,6 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
   endif
 
   if .width != undefined
-    while length(.spad$) < .width
-      .spad$ = " " + .spad$
-    endwhile
 
     if !index(.flag$, "-") and index(.flag$, "0")
       while length(.sig$ + .hpad$ + .zpad$ + .int$ + "." + .dec$) <= .width
