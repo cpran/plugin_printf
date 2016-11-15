@@ -3,8 +3,8 @@ include ../../plugin_utils/procedures/utils.proc
 include ../../plugin_utils/procedures/base_conversions.proc
 include ../../plugin_utils/procedures/try.proc
 
-include ../../plugin_utils/procedures/trace.proc
-trace.enable = 0
+# include ../../plugin_utils/procedures/trace.proc
+# trace.enable = 1
 
 if !variableExists("printf.system")
   call try
@@ -14,7 +14,7 @@ if !variableExists("printf.system")
   if try.catch
     printf.system = 0
   else
-    @trace: "Using perl printf"
+    # @trace: "Using perl printf"
     printf.system = 1
   endif
 endif
@@ -89,7 +89,7 @@ procedure sprintf ()
     .integers$ = .unsigned$ + "id"
     .doubles$  = "eEfF"
 
-    @trace: "Formatting """ + .argv$[1] + """"
+    # @trace: "Formatting """ + .argv$[1] + """"
     .todo$ = .argv$[1]
     .return$ = ""
 
@@ -121,7 +121,7 @@ procedure sprintf ()
       endif
     until .todo$ == "" or .failsafe > 1000
 
-    @trace: "Full result: """ + .return$ + """"
+    # @trace: "Full result: """ + .return$ + """"
   endif
 endproc
 
@@ -184,7 +184,7 @@ procedure _printf_parse: .todo$
     sprintf.i += 1
     sprintf.index = sprintf.i
   endif
-  @trace: "Fetching argument at position " + string$(sprintf.index)
+  # @trace: "Fetching argument at position " + string$(sprintf.index)
 
   if sprintf.index > sprintf.argn
     exitScript: "Not enough arguments for format string"
@@ -200,12 +200,12 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     .flag$ = replace$(.flag$, "0", "", 0)
   endif
 
-  @trace: "  Argument:  |" +         .arg$       + "|"
-  @trace: "  Flag:      |" +         .flag$      + "|"
-  @trace: "  Width:     |" + string$(.width)     + "|" + " (" + sprintf.width$     + ")"
-  @trace: "  Precision: |" + string$(.precision) + "|" + " (" + sprintf.precision$ + ")"
-  @trace: "  Length:    |" +         .length$    + "|"
-  @trace: "  Specifier: |" +         .specifier$ + "|"
+  # @trace: "  Argument:  |" +         .arg$       + "|"
+  # @trace: "  Flag:      |" +         .flag$      + "|"
+  # @trace: "  Width:     |" + string$(.width)     + "|" + " (" + sprintf.width$     + ")"
+  # @trace: "  Precision: |" + string$(.precision) + "|" + " (" + sprintf.precision$ + ")"
+  # @trace: "  Length:    |" +         .length$    + "|"
+  # @trace: "  Specifier: |" +         .specifier$ + "|"
 
   .pad$  = " " ; Character to use for padding
 
@@ -320,9 +320,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .oldp = .precision
       .oldw = .width
 
-      trace.level -= 1
+      # trace.level -= 1
       @_printf_replace: .flag$, undefined, undefined, .length$, "f", .arg$
-      trace.level += 1
+      # trace.level += 1
 
       .precision = .oldp
       .width     = .oldw
@@ -358,9 +358,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       endif
     endif
 
-    @trace: "Integer:   >" + .int$  + "<"
-    @trace: "Decimal:   >" + .dec$  + "<"
-    @trace: "Exponent:  >" + .exp$  + "<"
+    # @trace: "Integer:   >" + .int$  + "<"
+    # @trace: "Decimal:   >" + .dec$  + "<"
+    # @trace: "Exponent:  >" + .exp$  + "<"
 
     # Signage
     if index(sprintf.unsigned$, .specifier$)
@@ -373,7 +373,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       endif
     endif
 
-    @trace: "Sign:      >" + .sig$  + "<"
+    # @trace: "Sign:      >" + .sig$  + "<"
 
     # Padding
 
@@ -387,7 +387,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
         .hpad$ = "0"
       endif
     endif
-    @trace: "Hash pad:  >" + .hpad$ + "<"
+    # @trace: "Hash pad:  >" + .hpad$ + "<"
 
     # Zero padding
     if index(sprintf.integers$, .specifier$)
@@ -414,7 +414,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     if index(.flag$, "#") and index("o", .specifier$) and .zpad$ != ""
       .zpad$ = .zpad$ - "0"
     endif
-    @trace: "Zero pad:  >" + .zpad$ + "<"
+    # @trace: "Zero pad:  >" + .zpad$ + "<"
   endif
 
   # Construct string from components
@@ -426,7 +426,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     .str$ = .str$ + .exp$
   endif
-  @trace: "String: " + .str$
+  # @trace: "String: " + .str$
 
   # Pad with spaces
   if .width != undefined and .width > length(.str$)
@@ -449,5 +449,5 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     .return$ = toUpper.return$
   endif
 
-  @trace: "Result: " + .return$
+  # @trace: "Result: " + .return$
 endproc
