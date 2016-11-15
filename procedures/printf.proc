@@ -246,7 +246,7 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     # A precision of 0 means that no character is written for the value 0.
     if !.precision and .arg == 0
-      .str$ = ""
+      .int$ = ""
       .done = 1
     endif
   endif
@@ -389,12 +389,12 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
     # Padding
 
     # Hash padding
-    if index(.flag$, "#") and .arg
-      if index("xX", .specifier$)
+    if index(.flag$, "#")
+      if index("xX", .specifier$) and .arg
         .hpad$ = "0x"
-      elsif index("bB", .specifier$)
+      elsif index("bB", .specifier$) and .arg
         .hpad$ = "0b"
-      elsif .specifier$ == "o"
+      elsif .specifier$ == "o" and .int$ != "0"
         .hpad$ = "0"
       endif
     endif
