@@ -84,6 +84,7 @@ procedure sprintf ()
     .regex$ = "((?<!%)%([0-9]+\$)?([ 0#+-]+)?([0-9]+|\*)?(\.([0-9]*|\*))?(hh?|ll?|[jztL])?([bBdiouxXfFeEgGaAsn]))"
     .unsigned$ = "bouxX"
     .integers$ = .unsigned$ + "id"
+    .doubles$  = "eEfF"
 
     @trace: "Formatting """ + .argv$[1] + """"
     .todo$ = .argv$[1]
@@ -270,10 +271,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
       .exp$ = if length(.exp$) == 1 then "0" else "" fi + .exp$
 
       .exp$ = "e" + if .exp >= 0 then "+" else "-" fi + .exp$
-      .int = .arg / (10 ** .exp)
+      .num = .arg / (10 ** .exp)
 
-      .int$ = string$(.int div 1)
-      .dec$ = extractLine$(string$(.int), ".")
+      .int$ = string$(.num div 1)
 
     elsif index("diufF", .specifier$)
       # d  : a signed integer, in decimal
@@ -298,17 +298,9 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
             ...   ) div 1
             ... )
         endif
-      else
-        .int$ = replace_regex$(string$(.arg), "\..*", "", 1)
-      endif
 
-      # Approximate decimal part to precision, using fixed$() if defined
-      if .precision != undefined
-        .dec$ = extractLine$(fixed$(.arg, .precision), ".")
-        .dec$ = if index("diu", .specifier$) then "" else left$(.dec$, .precision) fi
+        .num = .arg
       else
-        .dec$ = extractLine$(string$(.arg), ".")
-        .dec$ = if index("diu", .specifier$) then "" else .dec$ fi
       endif
 
     elsif index("gG", .specifier$)
@@ -336,6 +328,15 @@ procedure _printf_replace: .flag$, .width, .precision, .length$, .specifier$, .a
 
     else
       exitScript: "Unsupported format specifier: ", .specifier$
+    endif
+
+    if index(sprintf.doubles$, .specifier$)
+      if .precision != undefined
+        .dec$ = extractLine$(fixed$(.num, .precision), ".")
+        .dec$ = left$(.dec$, .precision)
+      else
+        .dec$ = extractLine$(string$(.num), ".")
+      endif
     endif
 
     # For a, A, e, E, f and F specifiers, precision is the number of digits
