@@ -5,7 +5,7 @@ test.fatal = 0
 has_system = printf.system
 printf.system = 0
 
-@plan: 788
+@plan: 790
 
 for i to 2
   if printf.system and !has_system
@@ -492,6 +492,9 @@ for i to 2
   call @:mytest: "00edcb5433          ",   "%+ -0*.*x",      20, 10, 3989525555
   call @:mytest: "1234ABCD            ",   "% -+0*.*X",      20, 5, 305441741
   call @:mytest: "00EDCB5433          ",   "% -+0*.*X",      20, 10, 3989525555
+
+  # Unicode strings supported in fallback and pure-praat solutions
+  call @:mytest: "ð    ",                  "%-5s",           "ð"
 
   printf.system += 1
 
