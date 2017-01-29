@@ -1,4 +1,11 @@
 - next: # unreleased
+- v0.0.3:
+  - Fix:
+    - Consistent treatment of unicode strings in Perl and Praat
+      backends
+  - Changes:
+    - Increased depended version of varargs to 0.0.6, to solve
+      an issue with empty string variables
 - v0.0.2:
   - New:
     - Implemented support for %B
